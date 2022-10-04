@@ -2,22 +2,32 @@
 #include <cstdlib>
 #include <time.h>
 #include <chrono>
+#include <omp.h>
 
 
 using namespace std::chrono;
 using namespace std;
 
+#define NUM_THREADS 12
+
 void randomVector(int vector[], int size)
 {
-    for (int i = 0; i < size; i++)
+#pragma omp parallel
     {
-        //ToDo: Add Comment
-        vector[i] = rand() % 100;
+#pragma omp for
+        for (int i = 0; i < size; i++)
+        {
+            //ToDo: Add Comment
+            vector[i] = rand() % 100;
+        }
     }
 }
 
 
 int main(){
+
+    omp_set_dynamic(0);
+    omp_set_num_threads(NUM_THREADS);
 
     unsigned long size = 100000000;
 
@@ -40,9 +50,13 @@ int main(){
 
 
     //ToDo: Add Comment
-    for (int i = 0; i < size; i++)
+#pragma omp parallel
     {
-        v3[i] = v1[i] + v2[i];
+#pragma omp for 
+        for (int i = 0; i < size; i++)
+        {
+            v3[i] = v1[i] + v2[i];
+        }
     }
 
     auto stop = high_resolution_clock::now();
@@ -53,6 +67,8 @@ int main(){
 
     cout << "Time taken by function: "
          << duration.count() << " microseconds" << endl;
+
+    //cout << "Used " << omp_get_num_threads() << " threads" << endl;
 
     return 0;
 }
